@@ -1,0 +1,52 @@
+- name: create ec2 and r53 records
+  hosts: local
+  connection: local
+  vars:
+    subnet_id: subnet-09073cf76543f6234 # replace with your subnet id
+    sg_id: "sg-0e4f32642adc511a6" # replace with your security group id
+    ami_id: "ami-09c813fb71547fc4f" # replace with your image id
+    instances:
+    - mysql
+    - backend
+    - frontend
+    zone: workinghub.fun #replace your zone
+  tasks:
+  - name: create ec2 instance
+    amazon.aws.ec2_instance:
+      name: "{{ item }}"
+      vpc_subnet_id: "{{ subnet_id }}"
+      instance_type: "t3.micro"
+      security_group: "{{ sg_id }}"
+      image_id: "{{ ami_id }}"
+    loop: "{{ instances }}"
+    register: ec2_instances
+
+  - name: print the ec2_instances message 
+    ansible.builtin.debug:
+      msg: "{{ec2_instances}}"
+     #private IP R53
+  - name: create r53 private records  #<-- new code
+    amazon.aws.route53:
+      state: present
+      zone: "{{ zone }}"
+      record: "{{ item.item }}.{{ zone }}" #mysql.vijaydevops.store
+      type: A
+      ttl: 1
+      value: "{{ item.instances[0].private_ip_address }}"
+      wait: true
+      overwrite: true
+    loop: "{{ ec2_instances.results }}"
+  - name: create r53 public record for frontend 
+    amazon.aws.route53:
+      state: present
+      zone: "{{ zone }}"
+      record: "{{ zone }}" #mysql.vijaydevops.store
+      type: A
+      ttl: 1
+      value: "{{ item.instances[0].public_ip_address }}"
+      wait: true
+      overwrite: true
+    loop: "{{ ec2_instances.results }}"
+    when: item.item == "frontend"
+
+

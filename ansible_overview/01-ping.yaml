@@ -1,0 +1,7 @@
+
+- name: Ping operation
+  hosts: web  # Specify the target group or host from your inventory
+  gather_facts: no  # Optional: Disable gathering facts as it's unnecessary for ping
+  tasks:  # This should be plural to define the list of tasks
+    - name: Ping the client
+      ansible.builtin.ping:
