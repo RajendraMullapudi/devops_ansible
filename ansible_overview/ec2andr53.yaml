@@ -2,8 +2,8 @@
   hosts: local
   connection: local
   vars:
-    subnet_id: subnet-09073cf76543f6234 # replace with your subnet id
-    sg_id: "sg-0e4f32642adc511a6" # replace with your security group id
+    subnet_id: subnet-0d523f990bb820476 # replace with your subnet id
+    sg_id: "sg-00ddb4b6d12b1af05" # replace with your security group id
     ami_id: "ami-09c813fb71547fc4f" # replace with your image id
     instances:
     - mysql
